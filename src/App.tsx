@@ -1,12 +1,9 @@
-'use client'
-
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { Box, CircularProgress, Typography, useTheme, Alert } from '@mui/material'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeContextProvider } from './contexts/ThemeContext'
@@ -20,7 +17,7 @@ const Dashboard = lazy(() => import('./components/dashboard/LiveDashboard'))
 const EmployeeDirectory = lazy(() => import('./components/employees/EmployeeDirectory'))
 const AttendanceTracking = lazy(() => import('./components/attendance/ComprehensiveAttendanceSystem'))
 const LocationBasedAttendance = lazy(() => import('./components/attendance/LocationBasedAttendance'))
-const LeaveManagement = lazy(() => import('./components/leave/ComprehensiveLeaveManagement'))
+const LeaveManagement = lazy(() => import('./components/leave/OptimizedLeaveManagement'))
 const PayrollDashboard = lazy(() => import('./components/payroll/PayrollDashboard'))
 const AdvancedAnalyticsDashboard = lazy(() => import('./components/analytics/AdvancedAnalyticsDashboard').then(module => ({ default: module.AdvancedAnalyticsDashboard })))
 const EmployeeProfile = lazy(() => import('./components/employees/EmployeeProfile'))
@@ -52,44 +49,19 @@ const HRChatbot = lazy(() => import('./components/ai/HRChatbot'))
 // Simple loading fallback
 function LoadingScreen() {
   return (
-    <Box
-      sx={{
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <CircularProgress />
-    </Box>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
   )
 }
 
 // Route-level loading component
 function RouteLoading() {
-  const theme = useTheme()
-  
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '400px',
-        gap: 2,
-        p: 4
-      }}
-    >
-      <CircularProgress 
-        size={40} 
-        thickness={3}
-        sx={{ color: theme.palette.primary.main }} 
-      />
-      <Typography variant="body2" color="text.secondary">
-        Loading module...
-      </Typography>
-    </Box>
+    <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 p-4">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <p className="text-sm text-muted-foreground">Loading module...</p>
+    </div>
   )
 }
 

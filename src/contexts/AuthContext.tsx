@@ -363,13 +363,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Optimized Session Initialization
+  // Simplified Session Initialization - removed heavy fingerprinting
   useEffect(() => {
     let mounted = true
     
     const initializeAuth = async () => {
       try {
-        // Quick session check first
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -380,18 +379,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (mounted) {
           setUser(session?.user ?? null)
+          setIsLoading(false)
         }
         
         if (session?.user) {
-          // Fast profile loading without heavy security context
           try {
             await fetchSimpleProfile(session.user.id)
           } catch (error) {
             console.warn('⚠️ Profile loading failed, using fallback')
-            if (mounted) setIsLoading(false)
           }
-        } else {
-          if (mounted) setIsLoading(false)
         }
       } catch (error) {
         console.error('💥 Auth initialization failed:', error)
@@ -401,59 +397,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initializeAuth()
 
-    // Enhanced Auth State Listener
+    // Simplified Auth State Listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return
         
-        // console.log('🔐 Auth state change:', event, session?.user?.email)
-        
         setUser(session?.user ?? null)
+        setIsLoading(false)
         
-        if (session?.user && securityContext) {
-          // Skip profile loading for faster authentication
-          setIsLoading(false)
-          
-          // Load profile in background without blocking UI
-          setTimeout(async () => {
-            try {
-              await fetchSimpleProfile(session.user.id)
-            } catch (error) {
-              console.warn('⚠️ Background profile loading failed')
-            }
-          }, 100)
-
-          if (event === 'SIGNED_IN') {
-            // Log security event
-            await logAdvancedSecurityEvent({
-              event_type: 'SIGN_IN',
-              user_id: session.user.id,
-              security_context: securityContext,
-              timestamp: new Date().toISOString()
-            })
-
-            // Start monitoring
-            startAdvancedMonitoring(session.user.id, securityContext)
-
-            toast.success('🎉 Secure login successful!', {
-              description: 'Advanced security measures active'
-            })
-            
-            // ✅ FIXED: Set loading to false after successful login and profile loading
-            if (mounted) setIsLoading(false)
-          } else {
-            // ✅ FIXED: Set loading to false for other auth events as well
-            if (mounted) setIsLoading(false)
+        if (session?.user && event === 'SIGNED_IN') {
+          try {
+            await fetchSimpleProfile(session.user.id)
+            toast.success('🎉 Login successful!')
+          } catch (error) {
+            console.warn('⚠️ Profile loading failed')
           }
         } else if (event === 'SIGNED_OUT') {
-          // Cleanup on logout
           setProfile(null)
           setSecurityContext(null)
           setShouldNavigateToDashboard(false)
           setPendingNavigation(null)
-          stopAdvancedMonitoring()
-          setIsLoading(false)
-
           toast.success('👋 Logged out securely')
         }
       }
@@ -463,7 +426,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted = false
       subscription?.unsubscribe()
     }
-  }, [securityContext])
+  }, [])
 
   // Helper function to handle profile errors
   const handleProfileError = useCallback((error: any) => {
