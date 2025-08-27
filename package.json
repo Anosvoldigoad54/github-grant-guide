@@ -26,6 +26,7 @@
         "crypto-js": "^4.2.0",
         "date-fns": "^3.6.0",
         "file-saver": "^2.0.5",
+        "framer-motion": "^12.23.12",
         "jose": "^5.4.0",
         "jotai": "^2.8.0",
         "lodash": "^4.17.21",
